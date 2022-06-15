@@ -41,7 +41,7 @@ export class Server {
       }
 
     private async setMongoConfig() {
-        connect;
+        connect();
     }
 
     async listen(): Promise<void> {

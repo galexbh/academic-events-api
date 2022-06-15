@@ -1,33 +1,22 @@
 import { Request, Response } from "express";
-import UserModel, {User} from "../models/user.models";
+import { User, UserModel } from '../models/user.models';
 
 export class UserServices {
     public async createUser(req: Request, res: Response) {
-        const {
-            firstName,
-            lastname,
-            email,
-            password,
-          } = req.body;
-        
-        
-
-        return res.status(200).json({ message: "registered" });
+        const user: User = await UserModel.create({ ...req.body });
+        return res.status(201).json({ message: "registered", user });
     }
 
     public async loginUser(req: Request, res: Response) {
-        const {
-            email,
-            password,
-          } = req.body;
-
-
-        const passwordroot = await User.findOne({email})
-
-        if(passwordroot !== password) {
-            return res.status(400).json({ message: "no access" });
-        } else {
-            return res.status(200).json({ message: "access" });
+        const { email, password } = req.body;
+        const user: User | null = await UserModel.findOne({email});
+  
+        if(password !== user?.password){
+            return res.status(400).json({ message: "not access" });
         }
+
+        return res.status(201).json({ message: "login", user });
+        
+        
     }
 }
