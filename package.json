@@ -5,7 +5,7 @@
   "repository": {
     "url": "https://github.com/galexbh/academic-events-api"
   },
-  "main": "dist/app/backend/start.js",
+  "main": "dist/src/app/backend/start.js",
   "engines": {
     "node": "16.15.0"
   },
