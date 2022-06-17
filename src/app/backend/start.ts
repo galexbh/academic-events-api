@@ -1,13 +1,14 @@
 import { BackendApp } from './backendApp';
+import log from './shared/logger';
 
 try {
   new BackendApp().start();
 } catch (e) {
-  console.log(e);
+  log.error(e);
   process.exit(1);
 }
 
 process.on('uncaughtException', err => {
-  console.log('uncaughtException', err);
+  log.error('uncaughtException', err);
   process.exit(1);
 });

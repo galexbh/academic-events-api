@@ -1,6 +1,6 @@
-import 'dotenv/config'
+import 'dotenv/config';
 import { Server } from './server';
-import config from 'config'
+import config from 'config';
 
 const port = config.get<number>('port');
 
