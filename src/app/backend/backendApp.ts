@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { Server } from './server';
 import config from 'config';
 
-const port = config.get<number>('port');
+const port = config.get<string>('port');
 
 export class BackendApp {
   server?: Server;

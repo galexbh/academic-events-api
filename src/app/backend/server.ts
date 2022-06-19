@@ -12,13 +12,13 @@ import { UserController } from "./controllers/user.controller";
 
 export class Server {
     private express: express.Express;
-    private port: number;
+    private port: string;
     private httpServer?: http.Server;
 
     public mainController: MainController;
     public userController: UserController;
 
-    constructor(port: number) {
+    constructor(port: string) {
         this.port = port;
         this.setConfig();
         this.setMongoConfig();
