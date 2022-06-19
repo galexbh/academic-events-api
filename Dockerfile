@@ -1,7 +1,17 @@
-FROM node:16-slim
+FROM node:16
 
-WORKDIR /code
+ADD package.json /tmp/package.json
 
-COPY package.json pnpm-lock.yaml ./
-RUN npm install -g pnpm
-RUN pnpm install
+RUN rm -rf build
+
+RUN cd /tmp && npm install
+
+ADD ./ /src
+
+RUN rm -rf src/node_modules && cp -a /tmp/node_modules /src/
+
+WORKDIR /src
+
+RUN npm run build
+
+CMD ["node", "build/src/app/backend/start.js"]

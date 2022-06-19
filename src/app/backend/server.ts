@@ -1,12 +1,11 @@
 import { json, urlencoded } from 'body-parser';
 import compress from 'compression';
-import express, { Response } from 'express';
+import express from 'express';
 import helmet from 'helmet';
 import log from './shared/logger';
 import cors from 'cors';
 import connect from './shared/mongoConnection';
 import * as http from 'http';
-import { INTERNAL_SERVER_ERROR } from 'http-status'
 
 import { MainController } from "./controllers/main.controller";
 import { UserController } from "./controllers/user.controller";
@@ -26,11 +25,6 @@ export class Server {
 
         this.mainController = new MainController(this.express);
         this.userController = new UserController(this.express);
-
-        this.express.use((err, res: Response) => {
-            log.error(err);
-            res.status(INTERNAL_SERVER_ERROR).send('Something broke!');
-        });
 
     }
 

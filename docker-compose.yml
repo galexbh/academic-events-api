@@ -1,12 +1,12 @@
 version: '3.9'
 
 services:
-  academiceventsapi:
-    image: academiceventsapi
+  rest-api:
+    container_name: academic-events
+    restart: unless-stopped
     build:
-      context: .
-      dockerfile: ./Dockerfile
+      context: ./
     environment:
-      NODE_ENV: production
+      - NODE_ENV=production
     ports:
       - 3000:3000
