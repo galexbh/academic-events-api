@@ -30,12 +30,12 @@ export class User {
     public email: string;
 
     @prop({ required: true })
-    public firstname: string;
+    public firstName: string;
 
     @prop({ required: true })
-    public lastname: string;
+    public lastName: string;
 
-    @prop({ required: true, minlength: 8 })
+    @prop({ required: true, minlength: 6 })
     public password: string;
 
     @prop({ required: true, default: () => nanoid() })

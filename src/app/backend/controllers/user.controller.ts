@@ -1,20 +1,25 @@
 import { Request, Response } from "express";
 import { CreateUserInput, VerifyUserInput } from "../schemas/user.schema";
 import { createUser, findUserById } from "../services/user.services";
-import { OK, CREATED, CONFLICT, INTERNAL_SERVER_ERROR, ACCEPTED, NOT_FOUND } from 'http-status';
+import { CREATED, CONFLICT, INTERNAL_SERVER_ERROR, ACCEPTED, NOT_FOUND, BAD_REQUEST } from 'http-status';
 import sendEmail from "../shared/mailer";
 
 export class UserController {
     public async createUserHandler(req: Request<{}, {}, CreateUserInput>, res: Response) {
 
+        const body = req.body;
+
         try {
-            const user = await createUser(...req.body);
+            const user = await createUser(body);
 
             await sendEmail({
                 to: user.email,
                 from: "test@example.com",
                 subject: "Verify your email",
-                text: `verification code: ${user.verificationCode}. Id: ${user._id}`,
+                html: `
+                <form id="form" target="_self" method="POST" action="http://localhost:3000/api/v1/users/verify/${user._id}/${user.verificationCode}">
+                <button> Verificar </button>
+                </form>`,
             });
 
             return res.status(CREATED).send({ message: "User successfully created" });
@@ -29,6 +34,7 @@ export class UserController {
 
     public async verifyUserHandler(
         req: Request<VerifyUserInput>, res: Response) {
+
         const { id, verificationCode } = req.params
 
         const user = await findUserById(id);
@@ -38,7 +44,7 @@ export class UserController {
         }
 
         if (user.verified) {
-            return res.status(ACCEPTED).send({ message: "User is already verified" });
+            return res.status(BAD_REQUEST).send({ message: "User is already verified" });
         }
 
         if (user.verificationCode === verificationCode) {
