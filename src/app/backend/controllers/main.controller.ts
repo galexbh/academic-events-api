@@ -1,15 +1,7 @@
-import { Application } from "express";
-import { MainService } from "../services/main.services";
+import { Request, Response } from "express";
 
 export class MainController {
-  private mainservices: MainService;
-
-  constructor(private app: Application) {
-    this.mainservices = new MainService();
-    this.routes();
-  }
-
-  public routes() {
-    this.app.get("/", this.mainservices.welcome);
+  public welcome(_req: Request, res: Response) {
+    return res.send({ message: "Hello World", });
   }
 }
