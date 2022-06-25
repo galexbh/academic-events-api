@@ -7,24 +7,24 @@ import cors from 'cors';
 import connect from './shared/mongoConnection';
 import * as http from 'http';
 
-import { MainController } from "./controllers/main.controller";
-import { UserController } from "./controllers/user.controller";
+import { MainRoute } from "./routes/main.route";
+import { UserRoute } from "./routes/user.route";
 
 export class Server {
     private express: express.Express;
     private port: string;
     private httpServer?: http.Server;
 
-    public mainController: MainController;
-    public userController: UserController;
+    public mainRoute: MainRoute;
+    public userRoute: UserRoute;
 
     constructor(port: string) {
         this.port = port;
         this.setConfig();
         this.setMongoConfig();
 
-        this.mainController = new MainController(this.express);
-        this.userController = new UserController(this.express);
+        this.mainRoute = new MainRoute(this.express);
+        this.userRoute = new UserRoute(this.express);
 
     }
 
