@@ -21,7 +21,3 @@ UNAH (Autonomous University of Honduras). Project for the **Software engineering
 ## Necessary 📄
 
 - [Node v16](https://nodejs.org/es/)
-
-## Quick Deployment
-
-[![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy?template=https://github.com/galexbh/academic-events-api)
