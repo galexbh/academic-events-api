@@ -1,10 +1,10 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
 import { CreateUserInput, ForgotPasswordInput, ResetPasswordInput, VerifyUserInput } from '../schemas/user.schema';
-import { createUser, findUserByEmail, findUserById } from "../services/user.services";
-import { CREATED, CONFLICT, INTERNAL_SERVER_ERROR, ACCEPTED, NOT_FOUND, BAD_REQUEST } from 'http-status';
-import { nanoid } from "nanoid";
-import sendEmail from "../shared/mailer";
-import log from "../shared/logger";
+import { createUser, findUserByEmail, findUserById } from '../services/user.services';
+import { CREATED, CONFLICT, INTERNAL_SERVER_ERROR, ACCEPTED, NOT_FOUND, BAD_REQUEST, REQUEST_TIMEOUT } from 'http-status';
+import { nanoid } from 'nanoid';
+import sendEmail from '../shared/mailer';
+import log from '../shared/logger';
 
 export class UserController {
     public async createUserHandler(req: Request<{}, {}, CreateUserInput>, res: Response) {
@@ -24,13 +24,13 @@ export class UserController {
                 </form>`,
             });
 
-            return res.status(CREATED).send({ message: "User successfully created" });
+            return res.status(CREATED).json({ message: "User successfully created" });
         } catch (e: any) {
             if (e.code === 11000) {
-                return res.status(CONFLICT).send({ message: "Account already exists" });
+                return res.status(CONFLICT).json({ message: "Account already exists" });
             }
 
-            return res.status(INTERNAL_SERVER_ERROR).send({ message: e })
+            return res.status(INTERNAL_SERVER_ERROR).json({ message: "The server encountered an unexpected condition that prevented it from fulfilling the request" })
         }
     }
 
@@ -42,22 +42,29 @@ export class UserController {
         const user = await findUserById(id);
 
         if (!user) {
-            return res.status(NOT_FOUND).send({ message: "User not found" });
+            return res.status(NOT_FOUND).json({ message: "User not found" });
         }
 
         if (user.verified) {
-            return res.status(BAD_REQUEST).send({ message: "User is already verified" });
+            return res.status(BAD_REQUEST).json({ message: "User is already verified" });
         }
 
         if (user.verificationCode === verificationCode) {
             user.verified = true;
 
-            await user.save();
+            try {
 
-            return res.status(ACCEPTED).send({ message: "User successfully verified" });
+                await user.save();
+    
+                return res.status(ACCEPTED).json({ message: "Successfully updated password" });
+    
+            } catch (e: any) {
+    
+                return res.status(REQUEST_TIMEOUT).json({ message: "The server did not receive a complete request message within the time that it was prepared to wait" });
+            }
         }
 
-        return res.status(CONFLICT).send({ message: "Could not verify user" });
+        return res.status(CONFLICT).json({ message: "Could not verify user" });
     }
 
     public async forgotPasswordHandler(
@@ -71,11 +78,11 @@ export class UserController {
 
         if (!user) {
             log.debug(`User with email ${email} does not exists`);
-            return res.status(NOT_FOUND).send({ message: message });
+            return res.status(NOT_FOUND).json({ message: message });
         }
 
         if (!user.verified) {
-            return res.status(BAD_REQUEST).send({ message: "User is not verified" });
+            return res.status(BAD_REQUEST).json({ message: "User is not verified" });
         }
 
         const passwordResetCode = nanoid();
@@ -93,7 +100,7 @@ export class UserController {
 
         log.debug(`Password reset email sent to ${email}`);
 
-        return res.status(ACCEPTED).send({ message: message });
+        return res.status(ACCEPTED).json({ message: message });
     }
 
     public async resetPasswordHandler(
@@ -111,19 +118,27 @@ export class UserController {
             !user.passwordResetCode ||
             user.passwordResetCode !== passwordResetCode
         ) {
-            return res.status(BAD_REQUEST).send({ message: "Could not reset user password" });
+            return res.status(BAD_REQUEST).json({ message: "Could not reset user password" });
         }
 
         user.passwordResetCode = null;
 
         user.password = password;
 
-        await user.save();
+        try {
 
-        return res.status(ACCEPTED).send({ message: "Successfully updated password" });
+            await user.save();
+
+            return res.status(ACCEPTED).json({ message: "Successfully updated password" });
+
+        } catch (e: any) {
+
+            return res.status(REQUEST_TIMEOUT).json({ message: "The server did not receive a complete request message within the time that it was prepared to wait" });
+        }
+
     }
 
     public getCurrentUserHandler(_req: Request, res: Response) {
-        return res.send(res.locals.user);
+        return res.json(res.locals.user);
     }
 }

@@ -1,13 +1,14 @@
 import { Request, Response, NextFunction } from "express";
+import { FORBIDDEN } from "http-status";
 
-const requireUser = (req: Request, res: Response, next: NextFunction) => {
-  const user = res.locals.user;
+const requireUser = (_req: Request, res: Response, next: NextFunction) => {
+    const user = res.locals.user;
 
-  if (!user) {
-    return res.sendStatus(403);
-  }
+    if (!user) {
+        return res.sendStatus(FORBIDDEN).json({ message: "restricted" });
+    }
 
-  return next();
+    return next();
 };
 
 export default requireUser;
