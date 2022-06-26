@@ -5,9 +5,6 @@ export function createUser(input: Partial<User>) {
 }
 
 export function findUserById(id: string) {
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-        return null;
-    }
     return UserModel.findById(id);
 }
 
