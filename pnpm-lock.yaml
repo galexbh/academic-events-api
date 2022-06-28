@@ -20,7 +20,7 @@ specifiers:
   dotenv: 16.0.1
   express: 4.18.1
   helmet: 5.1.0
-  http-status: 1.5.2
+  http-status-codes: ^2.2.0
   jsonwebtoken: 8.5.1
   lodash: 4.17.21
   mongoose: 6.3.5
@@ -42,14 +42,13 @@ dependencies:
   dotenv: 16.0.1
   express: 4.18.1
   helmet: 5.1.0
-  http-status: 1.5.2
+  http-status-codes: 2.2.0
   jsonwebtoken: 8.5.1
   lodash: 4.17.21
   mongoose: 6.3.5
   nanoid: 3.3.4
   nodemailer: 6.7.5
   pino: 8.0.0
-  typescript: 4.7.3
   zod: 3.17.3
 
 devDependencies:
@@ -65,6 +64,7 @@ devDependencies:
   '@types/nodemailer': 6.4.4
   pino-pretty: 8.0.0
   ts-node-dev: 2.0.0_fvkldoeufjjq5mlpfdkzhuqzdy
+  typescript: 4.7.3
 
 packages:
 
@@ -841,9 +841,8 @@ packages:
       toidentifier: 1.0.1
     dev: false
 
-  /http-status/1.5.2:
-    resolution: {integrity: sha512-HzxX+/hV/8US1Gq4V6R6PgUmJ5Pt/DGATs4QhdEOpG8LrdS9/3UG2nnOvkqUpRks04yjVtV5p/NODjO+wvf6vg==}
-    engines: {node: '>= 0.4.0'}
+  /http-status-codes/2.2.0:
+    resolution: {integrity: sha512-feERVo9iWxvnejp3SEfm/+oNG517npqL2/PIA8ORjyOZjGC7TwCRQsZylciLS64i6pJ0wRYz3rkXLRwbtFa8Ng==}
     dev: false
 
   /https-proxy-agent/5.0.1:
@@ -1727,6 +1726,7 @@ packages:
     resolution: {integrity: sha512-WOkT3XYvrpXx4vMMqlD+8R8R37fZkjyLGlxavMc4iB8lrl8L0DeTcHbYgw/v0N/z9wAFsgBhcsF0ruoySS22mA==}
     engines: {node: '>=4.2.0'}
     hasBin: true
+    dev: true
 
   /unpipe/1.0.0:
     resolution: {integrity: sha1-sr9O6FFKrmFltIF4KdIbLvSZBOw=}

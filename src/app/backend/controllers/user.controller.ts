@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
 import { CreateUserInput, ForgotPasswordInput, ResetPasswordInput, VerifyUserInput } from '../schemas/user.schema';
 import { createUser, findUserByEmail, findUserById } from '../services/user.services';
-import { CREATED, CONFLICT, INTERNAL_SERVER_ERROR, ACCEPTED, NOT_FOUND, BAD_REQUEST, REQUEST_TIMEOUT } from 'http-status';
+import { StatusCodes } from 'http-status-codes';
 import { nanoid } from 'nanoid';
 import sendEmail from '../shared/mailer';
 import log from '../shared/logger';
+import { findOneRoleByName, findRoles } from '../services/role.services';
 
 export class UserController {
     public async createUserHandler(req: Request<{}, {}, CreateUserInput>, res: Response) {
@@ -12,6 +13,17 @@ export class UserController {
         const body = req.body;
 
         try {
+
+            if (!body.roles) {
+                const role = await findOneRoleByName("user");
+                body.roles = [role?._id];
+            }
+
+            if (body.roles) {
+                const foundRoles = await findRoles(body.roles);
+                body.roles = foundRoles.map((role) => role._id);
+            }
+
             const user = await createUser(body);
 
             await sendEmail({
@@ -19,18 +31,16 @@ export class UserController {
                 from: "test@example.com",
                 subject: "Verify your email",
                 html: `
-                <form id="form" target="_self" method="POST" action="http://localhost:3000/api/v1/users/verify/${user._id}/${user.verificationCode}">
-                <button> Verificar </button>
-                </form>`,
+                <a href="http://localhost:3000/api/v1/users/verify/${user._id}/${user.verificationCode}">hola mundo</a>`,
             });
 
-            return res.status(CREATED).json({ message: "User successfully created" });
+            return res.status(StatusCodes.CREATED).json({ message: "User successfully created" });
         } catch (e: any) {
             if (e.code === 11000) {
-                return res.status(CONFLICT).json({ message: "Account already exists" });
+                return res.status(StatusCodes.CONFLICT).json({ message: "Account already exists" });
             }
 
-            return res.status(INTERNAL_SERVER_ERROR).json({ message: "The server encountered an unexpected condition that prevented it from fulfilling the request" })
+            return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "The server encountered an unexpected condition that prevented it from fulfilling the request" })
         }
     }
 
@@ -42,11 +52,11 @@ export class UserController {
         const user = await findUserById(id);
 
         if (!user) {
-            return res.status(NOT_FOUND).json({ message: "User not found" });
+            return res.status(StatusCodes.NOT_FOUND).json({ message: "User not found" });
         }
 
         if (user.verified) {
-            return res.status(BAD_REQUEST).json({ message: "User is already verified" });
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: "User is already verified" });
         }
 
         if (user.verificationCode === verificationCode) {
@@ -55,16 +65,16 @@ export class UserController {
             try {
 
                 await user.save();
-    
-                return res.status(ACCEPTED).json({ message: "Successfully updated password" });
-    
+
+                return res.status(StatusCodes.ACCEPTED).json({ message: "Successfully updated verified" });
+
             } catch (e: any) {
-    
-                return res.status(REQUEST_TIMEOUT).json({ message: "The server did not receive a complete request message within the time that it was prepared to wait" });
+
+                return res.status(StatusCodes.REQUEST_TIMEOUT).json({ message: "The server did not receive a complete request message within the time that it was prepared to wait" });
             }
         }
 
-        return res.status(CONFLICT).json({ message: "Could not verify user" });
+        return res.status(StatusCodes.CONFLICT).json({ message: "Could not verify user" });
     }
 
     public async forgotPasswordHandler(
@@ -78,11 +88,11 @@ export class UserController {
 
         if (!user) {
             log.debug(`User with email ${email} does not exists`);
-            return res.status(NOT_FOUND).json({ message: message });
+            return res.status(StatusCodes.NOT_FOUND).json({ message: message });
         }
 
         if (!user.verified) {
-            return res.status(BAD_REQUEST).json({ message: "User is not verified" });
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: "User is not verified" });
         }
 
         const passwordResetCode = nanoid();
@@ -100,7 +110,7 @@ export class UserController {
 
         log.debug(`Password reset email sent to ${email}`);
 
-        return res.status(ACCEPTED).json({ message: message });
+        return res.status(StatusCodes.ACCEPTED).json({ message: message });
     }
 
     public async resetPasswordHandler(
@@ -118,7 +128,7 @@ export class UserController {
             !user.passwordResetCode ||
             user.passwordResetCode !== passwordResetCode
         ) {
-            return res.status(BAD_REQUEST).json({ message: "Could not reset user password" });
+            return res.status(StatusCodes.BAD_REQUEST).json({ message: "Could not reset user password" });
         }
 
         user.passwordResetCode = null;
@@ -129,11 +139,11 @@ export class UserController {
 
             await user.save();
 
-            return res.status(ACCEPTED).json({ message: "Successfully updated password" });
+            return res.status(StatusCodes.ACCEPTED).json({ message: "Successfully updated password" });
 
         } catch (e: any) {
 
-            return res.status(REQUEST_TIMEOUT).json({ message: "The server did not receive a complete request message within the time that it was prepared to wait" });
+            return res.status(StatusCodes.REQUEST_TIMEOUT).json({ message: "The server did not receive a complete request message within the time that it was prepared to wait" });
         }
 
     }

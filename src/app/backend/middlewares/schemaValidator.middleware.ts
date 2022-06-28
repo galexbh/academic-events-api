@@ -1,6 +1,6 @@
 import { NextFunction, Response, Request } from 'express';
 import { AnyZodObject, ZodError } from 'zod';
-import { BAD_REQUEST, INTERNAL_SERVER_ERROR } from 'http-status';
+import { StatusCodes } from 'http-status-codes';
 
 export const schemaValition =
   (schema: AnyZodObject) =>
@@ -16,9 +16,9 @@ export const schemaValition =
     } catch (err) {
       if (err instanceof ZodError) {
         return res
-          .status(BAD_REQUEST)
+          .status(StatusCodes.BAD_REQUEST)
           .json(err.issues.map((issues) => ({ message: issues.message })));
       }
-      return res.status(INTERNAL_SERVER_ERROR).json({ message: "internal server error" });
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "internal server error" });
     }
   };
