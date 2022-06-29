@@ -4,7 +4,6 @@ import { StatusCodes } from 'http-status-codes';
 
 export const schemaValition =
   (schema: AnyZodObject) =>
-  // @ts-ignore
   (req: Request, res: Response, next: NextFunction) => {
     try {
       schema.parse({
@@ -12,7 +11,7 @@ export const schemaValition =
           params: req.params,
           query: req.query
         });
-      next();
+      return next();
     } catch (err) {
       if (err instanceof ZodError) {
         return res

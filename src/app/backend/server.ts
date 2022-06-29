@@ -11,6 +11,7 @@ import * as http from "http";
 import { MainRoute } from "./routes/main.route";
 import { AuthRoute } from "./routes/auth.route";
 import { UserRoute } from "./routes/user.route";
+import { EventRoute } from "./routes/event.route";
 
 export class Server {
     private express: express.Express;
@@ -20,6 +21,7 @@ export class Server {
     public mainRoute: MainRoute;
     public authRoute: AuthRoute;
     public userRoute: UserRoute;
+    public eventRoute: EventRoute;
 
     constructor(port: string) {
         this.port = port;
@@ -29,6 +31,7 @@ export class Server {
         this.mainRoute = new MainRoute(this.express);
         this.authRoute = new AuthRoute(this.express);
         this.userRoute = new UserRoute(this.express);
+        this.eventRoute = new EventRoute(this.express);
     }
 
     private setConfig() {
