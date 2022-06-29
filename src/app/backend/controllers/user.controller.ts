@@ -31,7 +31,7 @@ export class UserController {
                 from: "test@example.com",
                 subject: "Verify your email",
                 html: `
-                <a href="http://localhost:3000/api/v1/users/verify/${user._id}/${user.verificationCode}">hola mundo</a>`,
+                <a href="http://localhost:3000/api/v1/users/verify/${user._id}/${user.verificationCode}">Verificar</a>`,
             });
 
             return res.status(StatusCodes.CREATED).json({ message: "User successfully created" });
@@ -105,7 +105,8 @@ export class UserController {
             to: user.email,
             from: "test@example.com",
             subject: "Reset your password",
-            text: `Password reset code: ${passwordResetCode}. Id ${user._id}`,
+            html: `
+                <a href="http://localhost:3000/api/v1/users/resetpassword/${user._id}/${user.verificationCode}">Restablecer Contraseña</a> `
         });
 
         log.debug(`Password reset email sent to ${email}`);

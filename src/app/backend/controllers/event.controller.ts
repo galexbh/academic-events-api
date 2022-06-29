@@ -56,8 +56,8 @@ export class EventController {
     public async getPrivateEventHandler(_req: Request, res: Response) {
 
         try {
-            const publicEvents = await findEventsPrivate();
-            return res.status(StatusCodes.OK).json({ message: "Event successfully created", publicEvents })
+            const privateEvents = await findEventsPrivate();
+            return res.status(StatusCodes.OK).json({ message: "Event successfully created", privateEvents })
         } catch (e: any) {
             console.log(e);
             return res.status(StatusCodes.CONFLICT).json({ message: "Conflicts when creating the event" });
