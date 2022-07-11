@@ -1,42 +1,21 @@
-import nodemailer, { SendMailOptions } from "nodemailer";
-import config from "config";
-import log from "./logger";
+import sgMail from '@sendgrid/mail';
+import config from 'config';
+import log from './logger';
 
-/*
-async function createTestCreds() {
-    const creds = await nodemailer.createTestAccount();
-    console.log({ creds });
-}
+const sgKey = config.get<string>('sendGridKey');
+sgMail.setApiKey(sgKey);
 
-createTestCreds();
+async function sendEmail(payload: sgMail.MailDataRequired) {
+    try {
+        sgMail.send(payload);
+        console.log("enviado")
+    } catch (e: any) {
+        log.error(e);
 
-async function sendEmail(){
-
-}
-*/
-
-const smtp = config.get<{
-    user: string;
-    pass: string;
-    host: string;
-    port: number;
-    secure: boolean;
-}>("smtp");
-
-const transporter = nodemailer.createTransport({
-    ...smtp,
-    auth: { user: smtp.user, pass: smtp.pass },
-});
-
-async function sendEmail(payload: SendMailOptions) {
-    transporter.sendMail(payload, (err, info) => {
-        if (err) {
-            log.error(err, "Error sending email");
-            return;
+        if (e.response) {
+            log.error(e.response.body);
         }
-
-        log.info(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
-    });
+    }
 }
 
 export default sendEmail;

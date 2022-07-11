@@ -3,9 +3,13 @@ import { CreateUserInput, ForgotPasswordInput, ResetPasswordInput, VerifyUserInp
 import { createUser, findUserByEmail, findUserById } from '../services/user.services';
 import { StatusCodes } from 'http-status-codes';
 import { nanoid } from 'nanoid';
-import sendEmail from '../shared/mailer';
 import log from '../shared/logger';
 import { findOneRoleByName, findRoles } from '../services/role.services';
+import sendEmail from '../shared/mailer';
+import config from 'config';
+import { templateVerifyUser } from '../templates/verify';
+
+const mailCompany = config.get<string>('emailAddress');
 
 export class UserController {
     public async createUserHandler(req: Request<{}, {}, CreateUserInput>, res: Response) {
@@ -26,12 +30,13 @@ export class UserController {
 
             const user = await createUser(body);
 
+            const template = templateVerifyUser(user.firstName, user._id, user.verificationCode);
+            
             await sendEmail({
                 to: user.email,
-                from: "test@example.com",
+                from: mailCompany,
                 subject: "Verify your email",
-                html: `
-                <a href="http://localhost:3000/api/v1/users/verify/${user._id}/${user.verificationCode}">Verificar</a>`,
+                html: template
             });
 
             return res.status(StatusCodes.CREATED).json({ message: "User successfully created" });
@@ -102,11 +107,10 @@ export class UserController {
         await user.save();
 
         await sendEmail({
-            to: user.email,
-            from: "test@example.com",
+            to: "user.email",
+            from: mailCompany,
             subject: "Reset your password",
-            html: `
-                <a href="http://localhost:3000/api/v1/users/resetpassword/${user._id}/${user.verificationCode}">Restablecer Contraseña</a> `
+            html: ""
         });
 
         log.debug(`Password reset email sent to ${email}`);
