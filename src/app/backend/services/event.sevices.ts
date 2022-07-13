@@ -15,7 +15,7 @@ export function findEventByIdAndDelete(_id: string) {
 export function findEventsPublic() {
     return EventModel.find({
         type: "publico",
-    });
+    }).populate("category");
 }
 
 export function findEventsPrivate() {

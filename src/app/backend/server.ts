@@ -12,6 +12,8 @@ import { MainRoute } from "./routes/main.route";
 import { AuthRoute } from "./routes/auth.route";
 import { UserRoute } from "./routes/user.route";
 import { EventRoute } from "./routes/event.route";
+import { CategoryRoute } from "./routes/category.route";
+import { InstitutionRoute } from "./routes/institution.route";
 
 export class Server {
     private express: express.Express;
@@ -22,6 +24,8 @@ export class Server {
     public authRoute: AuthRoute;
     public userRoute: UserRoute;
     public eventRoute: EventRoute;
+    public categoryRoute: CategoryRoute;
+    public institutionRoute: InstitutionRoute;
 
     constructor(port: string) {
         this.port = port;
@@ -32,6 +36,8 @@ export class Server {
         this.authRoute = new AuthRoute(this.express);
         this.userRoute = new UserRoute(this.express);
         this.eventRoute = new EventRoute(this.express);
+        this.categoryRoute = new CategoryRoute(this.express);
+        this.institutionRoute = new InstitutionRoute(this.express);
     }
 
     private setConfig() {

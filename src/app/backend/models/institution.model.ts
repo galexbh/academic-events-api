@@ -5,8 +5,8 @@ export class Institution {
     @prop()
     public name: string;
 
-    @prop()
-    public domain: string;
+    @prop({ type: () => [String] })
+    public domain: string[];
 
 }
 

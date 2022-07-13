@@ -16,7 +16,7 @@ export class Event {
     @prop({ enum: ["publico", "privado"] })
     public type: string;
 
-    @prop({ required: true, ref: () => Category })
+    @prop({ required: true, autopopulate: true, ref: () => Category })
     public category: Ref<Category>;
 
     //@prop({ required: true })

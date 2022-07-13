@@ -1,10 +1,11 @@
 import { BackendApp } from './backendApp';
-import { createRoles } from './libs/initialSetup';
+import { createRoles, createCategories } from './libs/initialSetup';
 import log from './shared/logger';
 
 try {
   new BackendApp().start();
   createRoles();
+  createCategories();
 } catch (e) {
   log.error(e);
   process.exit(1);
