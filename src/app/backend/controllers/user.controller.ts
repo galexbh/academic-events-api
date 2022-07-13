@@ -8,13 +8,16 @@ import { findOneRoleByName, findRoles } from '../services/role.services';
 import sendEmail from '../shared/mailer';
 import config from 'config';
 import { templateVerifyUser } from '../templates/verify';
+import { templateResetPassword } from '../templates/resetPassword';
+import { findInstitutionByDomain } from '../services/institution.services';
+import { assign } from 'lodash';
 
 const mailCompany = config.get<string>('emailAddress');
 
 export class UserController {
-    public async createUserHandler(req: Request<{}, {}, CreateUserInput>, res: Response) {
+    public async createUserHandler(_req: Request<{}, {}, CreateUserInput>, res: Response) {
 
-        const body = req.body;
+        const body = _req.body;
 
         try {
 
@@ -28,10 +31,16 @@ export class UserController {
                 body.roles = foundRoles.map((role) => role._id);
             }
 
-            const user = await createUser(body);
+            const domain = body.email.substring(body.email.indexOf('@') + 1, body.email.length);
+
+            const Institution = await findInstitutionByDomain(domain);
+            
+            const payload = assign({ institution: Institution?._id }, body)
+
+            const user = await createUser(payload);
 
             const template = templateVerifyUser(user.firstName, user._id, user.verificationCode);
-            
+
             await sendEmail({
                 to: user.email,
                 from: mailCompany,
@@ -106,11 +115,13 @@ export class UserController {
 
         await user.save();
 
+        const template = templateResetPassword(user.firstName, user._id, user.verificationCode);
+
         await sendEmail({
-            to: "user.email",
+            to: user.email,
             from: mailCompany,
             subject: "Reset your password",
-            html: ""
+            html: template
         });
 
         log.debug(`Password reset email sent to ${email}`);

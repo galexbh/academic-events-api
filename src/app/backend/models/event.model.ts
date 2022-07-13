@@ -1,5 +1,5 @@
 import { getModelForClass, prop, Ref } from "@typegoose/typegoose";
-//import { Category } from "./category.model";
+import { Category } from "./category.model";
 import { User } from "./user.model";
 
 export class Event {
@@ -16,11 +16,11 @@ export class Event {
     @prop({ enum: ["publico", "privado"] })
     public type: string;
 
-    //@prop({ required: true, ref: () => Category })
-    //public category: Ref<Category>;
+    @prop({ required: true, ref: () => Category })
+    public category: Ref<Category>;
 
-    @prop({ required: true })
-    public category: string;
+    //@prop({ required: true })
+    //public category: string;
 
     @prop({ required: true, ref: () => User })
     public owner: Ref<User>;

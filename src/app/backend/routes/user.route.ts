@@ -29,7 +29,7 @@ export class UserRoute {
       schemaValition(verifyUserSchema),
       this.userController.verifyUserHandler
     );
-
+      
     this.app.post(
       "/api/v1/users/forgotpassword",
       schemaValition(forgotPasswordSchema),
