@@ -3,3 +3,9 @@ run:
 
 dev:
 	pnpm dev
+
+build:
+	pnpm build
+
+start:
+	pnpm start
