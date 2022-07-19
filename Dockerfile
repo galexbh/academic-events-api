@@ -2,7 +2,7 @@ FROM node:16
 
 ADD package.json /tmp/package.json
 
-ADD package.json.lock /tmp/package.json.lock
+ADD package-lock.json /tmp/package-lock.json
 
 RUN rm -rf build
 
