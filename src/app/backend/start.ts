@@ -1,6 +1,6 @@
-import { BackendApp } from './backendApp';
-import { createRoles, createCategories } from './libs/initialSetup';
-import log from './shared/logger';
+import { BackendApp } from "./backendApp";
+import { createRoles, createCategories } from "./libs/initialSetup";
+import log from "./shared/logger";
 
 try {
   new BackendApp().start();
@@ -11,7 +11,7 @@ try {
   process.exit(1);
 }
 
-process.on('uncaughtException', err => {
-  log.error('uncaughtException', err);
+process.on("uncaughtException", (err) => {
+  log.error("uncaughtException", err);
   process.exit(1);
 });

@@ -12,9 +12,10 @@ export class AuthRoute {
   }
 
   public routes() {
-    this.app
-      .post("/api/v1/sessions",
-        schemaValition(createSessionSchema),
-        this.authcontroller.createSessionHandler);
+    this.app.post(
+      "/api/v1/sessions",
+      schemaValition(createSessionSchema),
+      this.authcontroller.createSessionHandler
+    );
   }
 }

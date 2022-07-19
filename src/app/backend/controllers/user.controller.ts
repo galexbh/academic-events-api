@@ -32,7 +32,7 @@ export class UserController {
 
     try {
       if (!body.roles) {
-        const role = await findOneRoleByName("user");
+        const role = await findOneRoleByName();
         body.roles = [role?._id];
       } else {
         const foundRoles = await findRoles(body.roles);
@@ -73,12 +73,10 @@ export class UserController {
           .json({ message: "Account already exists" });
       }
 
-      return res
-        .status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({
-          message:
-            "The server encountered an unexpected condition that prevented it from fulfilling the request",
-        });
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message:
+          "The server encountered an unexpected condition that prevented it from fulfilling the request",
+      });
     }
   }
 
@@ -109,12 +107,10 @@ export class UserController {
           .status(StatusCodes.ACCEPTED)
           .json({ message: "Successfully updated verified" });
       } catch (e: any) {
-        return res
-          .status(StatusCodes.REQUEST_TIMEOUT)
-          .json({
-            message:
-              "The server did not receive a complete request message within the time that it was prepared to wait",
-          });
+        return res.status(StatusCodes.REQUEST_TIMEOUT).json({
+          message:
+            "The server did not receive a complete request message within the time that it was prepared to wait",
+        });
       }
     }
 
@@ -200,12 +196,10 @@ export class UserController {
         .status(StatusCodes.ACCEPTED)
         .json({ message: "Successfully updated password" });
     } catch (e: any) {
-      return res
-        .status(StatusCodes.REQUEST_TIMEOUT)
-        .json({
-          message:
-            "The server did not receive a complete request message within the time that it was prepared to wait",
-        });
+      return res.status(StatusCodes.REQUEST_TIMEOUT).json({
+        message:
+          "The server did not receive a complete request message within the time that it was prepared to wait",
+      });
     }
   }
 

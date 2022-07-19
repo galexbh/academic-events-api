@@ -5,5 +5,6 @@ export default {
   refreshTokenPublicKey: "REFRESH_PUBLIC_KEY",
   dbUri: "MONGO_CONNECTION_KEY",
   sendGridKey: "SENDGRID_API_KEY",
-  emailAddress: "EMAIL_ADDRESS"
+  emailAddress: "EMAIL_ADDRESS",
+  port: "PORT",
 };
