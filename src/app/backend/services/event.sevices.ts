@@ -21,5 +21,5 @@ export function findEventsPublic() {
 export function findEventsPrivate() {
   return EventModel.find({
     type: "privado",
-  });
+  }).populate("owner");
 }

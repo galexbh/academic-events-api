@@ -123,46 +123,55 @@ export class UserController {
     req: Request<{}, {}, ForgotPasswordInput>,
     res: Response
   ) {
-    const message =
-      "If a user with that email is registered you will receive a password reset email";
+    try {
+      const message =
+        "If a user with that email is registered you will receive a password reset email";
 
-    const { email } = req.body;
+      const { email } = req.body;
 
-    const user = await findUserByEmail(email);
+      const user = await findUserByEmail(email);
 
-    if (!user) {
-      log.debug(`User with email ${email} does not exists`);
-      return res.status(StatusCodes.NOT_FOUND).json({ message: message });
-    }
+      if (!user) {
+        log.debug(`User with email ${email} does not exists`);
+        return res.status(StatusCodes.NOT_FOUND).json({ message: message });
+      }
 
-    if (!user.verified) {
+      if (!user.verified) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "User is not verified" });
+      }
+
+      const passwordResetCode = nanoid();
+
+      user.passwordResetCode = passwordResetCode;
+
+      await user.save();
+
+      const template = templateResetPassword(
+        user.firstName,
+        user._id,
+        user.verificationCode
+      );
+
+      await sendEmail({
+        to: user.email,
+        from: mailCompany,
+        subject: "Reset your password",
+        html: template,
+      });
+
+      log.debug(`Password reset email sent to ${email}`);
+
+      return res.status(StatusCodes.ACCEPTED).json({ message: message });
+    } catch (e: any) {
       return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "User is not verified" });
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({
+          message:
+            "The server encountered an unexpected condition that prevented it from fulfilling the request",
+        });
     }
-
-    const passwordResetCode = nanoid();
-
-    user.passwordResetCode = passwordResetCode;
-
-    await user.save();
-
-    const template = templateResetPassword(
-      user.firstName,
-      user._id,
-      user.verificationCode
-    );
-
-    await sendEmail({
-      to: user.email,
-      from: mailCompany,
-      subject: "Reset your password",
-      html: template,
-    });
-
-    log.debug(`Password reset email sent to ${email}`);
-
-    return res.status(StatusCodes.ACCEPTED).json({ message: message });
   }
 
   public async resetPasswordHandler(

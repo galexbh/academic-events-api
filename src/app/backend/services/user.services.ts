@@ -11,5 +11,5 @@ export function findUserById(id: string) {
 export function findUserByEmail(email: string) {
   return UserModel.findOne({ email })
     .populate("roles", "-_id name")
-    .populate("institution", "-_id name");
+    .populate("institution", "name");
 }

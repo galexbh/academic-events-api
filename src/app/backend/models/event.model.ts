@@ -18,9 +18,6 @@ export class Event {
   @prop({ required: true, autopopulate: true, ref: () => Category })
   public category: Ref<Category>;
 
-  //@prop({ required: true })
-  //public category: string;
-
   @prop({ required: true, ref: () => User })
   public owner: Ref<User>;
 

@@ -53,7 +53,7 @@ export class User {
   @prop({ required: true, minlength: 6 })
   public password: string;
 
-  @prop({ autopopulate: true, ref: () => Institution })
+  @prop({ ref: () => Institution })
   public institution: Ref<Institution>;
 
   @prop({ ref: () => Role })
