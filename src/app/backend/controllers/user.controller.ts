@@ -151,7 +151,7 @@ export class UserController {
       const template = templateResetPassword(
         user.firstName,
         user._id,
-        user.verificationCode
+        user.passwordResetCode
       );
 
       await sendEmail({
