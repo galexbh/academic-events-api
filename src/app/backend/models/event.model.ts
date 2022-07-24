@@ -1,5 +1,6 @@
 import { getModelForClass, prop, Ref } from "@typegoose/typegoose";
 import { Category } from "./category.model";
+import { Institution } from "./institution.model";
 import { User } from "./user.model";
 
 export class Event {
@@ -15,6 +16,9 @@ export class Event {
   @prop({ enum: ["publico", "privado"] })
   public type: string;
 
+  @prop({ ref: () => Institution })
+  public institution: Ref<Institution>;
+
   @prop({ required: true, autopopulate: true, ref: () => Category })
   public category: Ref<Category>;
 
@@ -29,6 +33,9 @@ export class Event {
 
   @prop({ default: 0 })
   public limitParticipants: number;
+
+  @prop({ default: 0 })
+  public registeredParticipants: number;
 
   @prop({ required: true })
   public startDate: string;

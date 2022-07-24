@@ -1,9 +1,4 @@
-export const templateVerifyUser = (
-  name: string,
-  id: string,
-  verificationCode: string
-) =>
-  `
+export const templateEventSubscription = (name: string, title: string) => `
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html data-editor-version="2" class="sg-campaigns" xmlns="http://www.w3.org/1999/xhtml">
     <head>
@@ -187,14 +182,14 @@ body {font-family: 'Muli', sans-serif;}
   </table><table class="module" role="module" data-type="text" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="948e3f3f-5214-4721-a90e-625a47b1c957" data-mc-module-version="2019-10-22">
     <tbody>
       <tr>
-        <td style="padding:50px 30px 18px 30px; line-height:36px; text-align:inherit; background-color:#ffffff;" height="100%" valign="top" bgcolor="#ffffff" role="module-content"><div><div style="font-family: inherit; text-align: center"><span style="font-size: 43px">¡Gracias por registrarte, ${name}!</span></div><div></div></div></td>
+        <td style="padding:50px 30px 18px 30px; line-height:36px; text-align:inherit; background-color:#ffffff;" height="100%" valign="top" bgcolor="#ffffff" role="module-content"><div><div style="font-family: inherit; text-align: center"><span style="font-size: 43px">¡Gracias por inscribirte, ${name}!</span></div><div></div></div></td>
       </tr>
     </tbody>
   </table><table class="module" role="module" data-type="text" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="a10dcb57-ad22-4f4d-b765-1d427dfddb4e" data-mc-module-version="2019-10-22">
     <tbody>
       <tr>
-        <td style="padding:18px 30px 18px 30px; line-height:22px; text-align:inherit; background-color:#ffffff;" height="100%" valign="top" bgcolor="#ffffff" role="module-content"><div><div style="font-family: inherit; text-align: center"><span style="font-size: 18px">Verifique su dirección de correo electrónico para obtener acceso a</span><span style="color: #000000; font-size: 18px; font-family: arial, helvetica, sans-serif"> miles de eventos esperandole</span><span style="font-size: 18px">.</span></div>
-<div style="font-family: inherit; text-align: center"><span style="color: #ffbe00; font-size: 18px"><strong>¡Gracias!</strong></span></div><div></div></div></td>
+        <td style="padding:18px 30px 18px 30px; line-height:22px; text-align:inherit; background-color:#ffffff;" height="100%" valign="top" bgcolor="#ffffff" role="module-content"><div><div style="font-family: inherit; text-align: center"><span style="font-size: 18px">Tiene un cupo reservado en:</span><span style="color: #000000; font-size: 18px; font-family: arial, helvetica, sans-serif"> ${title} </span><span style="font-size: 18px">.</span></div>
+<div style="font-family: inherit; text-align: center"><span style="color: #ffbe00; font-size: 18px"><strong>¡Le esperamos!</strong></span></div><div></div></div></td>
       </tr>
     </tbody>
   </table><table class="module" role="module" data-type="spacer" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="7770fdab-634a-4f62-a277-1c66b2646d8d">
@@ -208,15 +203,6 @@ body {font-family: 'Muli', sans-serif;}
       <tbody>
         <tr>
           <td align="center" bgcolor="#ffffff" class="outer-td" style="padding:0px 0px 0px 0px; background-color:#ffffff;">
-            <table border="0" cellpadding="0" cellspacing="0" class="wrapper-mobile" style="text-align:center;">
-              <tbody>
-                <tr>
-                <td align="center" bgcolor="#ffbe00" class="inner-td" style="border-radius:6px; font-size:16px; text-align:center; background-color:inherit;">
-                  <a href="http://localhost:8080/verifyUser?id=${id}&verificationCode=${verificationCode}" style="background-color:#ffbe00; border:1px solid #ffbe00; border-color:#ffbe00; border-radius:0px; border-width:1px; color:#000000; display:inline-block; font-size:14px; font-weight:normal; letter-spacing:0px; line-height:normal; padding:12px 40px 12px 40px; text-align:center; text-decoration:none; border-style:solid; font-family:inherit;" target="_blank">Verificar</a>
-                </td>
-                </tr>
-              </tbody>
-            </table>
           </td>
         </tr>
       </tbody>
@@ -228,47 +214,6 @@ body {font-family: 'Muli', sans-serif;}
       </tr>
     </tbody>
   </table><table class="module" role="module" data-type="text" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="a265ebb9-ab9c-43e8-9009-54d6151b1600" data-mc-module-version="2019-10-22">
-    <tbody>
-      <tr>
-        <td style="padding:50px 30px 50px 30px; line-height:22px; text-align:inherit; background-color:#6e6e6e;" height="100%" valign="top" bgcolor="#6e6e6e" role="module-content"><div><div style="font-family: inherit; text-align: center"><span style="color: #ffffff; font-size: 18px"><strong>Esto es lo que ocurre a continuación:</strong></span></div>
-<div style="font-family: inherit; text-align: center"><br></div>
-<div style="font-family: inherit; text-align: center"><span style="color: #ffffff; font-size: 18px">1. Podrás acceder a miles de eventos en tu comunidad.</span></div>
-<div style="font-family: inherit; text-align: center"><br></div>
-<div style="font-family: inherit; text-align: center"><span style="color: #ffffff; font-size: 18px">2. Podrás inscribirte a eventos para mejorar tu nivel académico.</span></div>
-<div style="font-family: inherit; text-align: center"><br></div>
-<div style="font-family: inherit; text-align: center"><span style="color: #ffbe00; font-size: 18px"><strong>+ ¡mucho más!</strong></span></div>
-<div style="font-family: inherit; text-align: center"><br></div>
-<div style="font-family: inherit; text-align: center"><span style="color: #ffffff; font-size: 18px">¿Necesita ayuda? Nuestro equipo de soporte está siempre.</span></div>
-<div style="font-family: inherit; text-align: center"><span style="color: #ffffff; font-size: 18px">listo para ayudar.</span></div><div></div></div></td>
-      </tr>
-    </tbody>
-  </table><table border="0" cellpadding="0" cellspacing="0" class="module" data-role="module-button" data-type="button" role="module" style="table-layout:fixed;" width="100%" data-muid="d050540f-4672-4f31-80d9-b395dc08abe1.1">
-      <tbody>
-        <tr>
-          <td align="center" bgcolor="#6e6e6e" class="outer-td" style="padding:0px 0px 0px 0px; background-color:#6e6e6e;">
-            <table border="0" cellpadding="0" cellspacing="0" class="wrapper-mobile" style="text-align:center;">
-              <tbody>
-                <tr>
-                <td align="center" bgcolor="#ffbe00" class="inner-td" style="border-radius:6px; font-size:16px; text-align:center; background-color:inherit;">
-                  <a href="" style="background-color:#ffbe00; border:1px solid #ffbe00; border-color:#ffbe00; border-radius:0px; border-width:1px; color:#000000; display:inline-block; font-size:14px; font-weight:normal; letter-spacing:0px; line-height:normal; padding:12px 40px 12px 40px; text-align:center; text-decoration:none; border-style:solid; font-family:inherit;" target="_blank">Soporte Ténico</a>
-                </td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
-      </tbody>
-    </table><table class="module" role="module" data-type="spacer" border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;" data-muid="c37cc5b7-79f4-4ac8-b825-9645974c984e">
-    <tbody>
-      <tr>
-        <td style="padding:0px 0px 30px 0px;" role="module-content" bgcolor="6E6E6E">
-        </td>
-      </tr>
-    </tbody>
-  </table></td>
-        </tr>
-      </tbody>
-    </table></td>
           <td align="center" bgcolor="" class="outer-td" style="padding:0px 0px 20px 0px;">
             <table border="0" cellpadding="0" cellspacing="0" class="wrapper-mobile" style="text-align:center;">
             </table>

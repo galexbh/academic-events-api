@@ -23,6 +23,12 @@ export class EventRoute {
       this.eventcontroller.createEventHandler
     );
 
+    this.app.post(
+      "/api/v1/events/subscribed/:id",
+      [verifyUser, schemaValition(idEventSchema)],
+      this.eventcontroller.eventSubscriptionHandler
+    );
+
     this.app.put(
       "/api/v1/events/:id",
       [verifyUser, schemaValition(updateEventSchema)],
@@ -45,6 +51,18 @@ export class EventRoute {
       "/api/v1/events/private",
       verifyUser,
       this.eventcontroller.getPrivateEventHandler
+    );
+
+    this.app.get(
+      "/api/v1/events/own",
+      verifyUser,
+      this.eventcontroller.myOwnEventsHandler
+    );
+
+    this.app.get(
+      "/api/v1/events/me",
+      verifyUser,
+      this.eventcontroller.myEventRegistrationHandler
     );
   }
 }

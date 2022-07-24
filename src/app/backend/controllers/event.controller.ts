@@ -11,8 +11,16 @@ import {
   findEventByIdAndUpdate,
   findEventsPrivate,
   findEventsPublic,
+  findOneEvent,
+  searchMyRegisteredEvents,
+  searchOwnEvents,
 } from "../services/event.sevices";
 import { assign } from "lodash";
+import sendEmail from "../shared/mailer";
+import config from "config";
+import { templateEventSubscription } from "../templates/eventSubscription";
+
+const mailCompany = config.get<string>("emailAddress");
 
 export class EventController {
   public async createEventHandler(
@@ -20,7 +28,10 @@ export class EventController {
     res: Response
   ) {
     const user = res.locals.user;
-    const payload = assign({ owner: user._id }, req.body);
+    const payload = assign(
+      { owner: user._id, institution: user.institution },
+      req.body
+    );
     try {
       await createEvent(payload);
 
@@ -44,12 +55,12 @@ export class EventController {
       await findEventByIdAndUpdate(id, { ...req.body });
       return res
         .status(StatusCodes.OK)
-        .json({ message: "Event successfully created" });
+        .json({ message: "Event successfully updated" });
     } catch (e: any) {
       console.log(e);
       return res
         .status(StatusCodes.CONFLICT)
-        .json({ message: "Conflicts when creating the event" });
+        .json({ message: "Conflicts when updating the event" });
     }
   }
 
@@ -60,12 +71,12 @@ export class EventController {
       await findEventByIdAndDelete(id);
       return res
         .status(StatusCodes.OK)
-        .json({ message: "Event successfully created" });
+        .json({ message: "Event successfully deleted" });
     } catch (e: any) {
       console.log(e);
       return res
         .status(StatusCodes.CONFLICT)
-        .json({ message: "Conflicts when creating the event" });
+        .json({ message: "Conflicts when deleting the event" });
     }
   }
 
@@ -74,27 +85,118 @@ export class EventController {
       const publicEvents = await findEventsPublic();
       return res
         .status(StatusCodes.OK)
-        .json({ message: "Event successfully created", publicEvents });
+        .json({ message: "Successful public events", publicEvents });
     } catch (e: any) {
       console.log(e);
       return res
         .status(StatusCodes.CONFLICT)
-        .json({ message: "Conflicts when creating the event" });
+        .json({ message: "Conflicts in obtaining events" });
     }
   }
 
   public async getPrivateEventHandler(_req: Request, res: Response) {
-    
+    const user = res.locals.user;
     try {
-      const privateEvents = await findEventsPrivate();
+      const privateEvents = await findEventsPrivate(user.institution);
       return res
         .status(StatusCodes.OK)
-        .json({ message: "Event successfully created", privateEvents });
+        .json({ message: "Successful private events", privateEvents });
     } catch (e: any) {
       console.log(e);
       return res
         .status(StatusCodes.CONFLICT)
-        .json({ message: "Conflicts when find the event" });
+        .json({ message: "Conflicts in obtaining events" });
+    }
+  }
+
+  public async eventSubscriptionHandler(
+    req: Request<IdEventInput>,
+    res: Response
+  ) {
+    const user = res.locals.user;
+    try {
+      const { id } = req.params;
+      const event = await findOneEvent(id);
+
+      if (!event) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "No event found" });
+      }
+
+      if (event.registeredParticipants >= event.limitParticipants) {
+        return res
+          .status(StatusCodes.ACCEPTED)
+          .json({ message: "No more quotas" });
+      }
+
+      event.registeredParticipants++;
+      event.subscribers.push(user._id);
+      event.save();
+
+      const template = templateEventSubscription(user.firstName, event.title);
+
+      await sendEmail({
+        to: user.email,
+        from: mailCompany,
+        subject: "Thank you for registering",
+        html: template,
+      });
+
+      return res
+        .status(StatusCodes.OK)
+        .json({ message: "User has registered to the event" });
+    } catch (e) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message:
+          "The server encountered an unexpected condition that prevented it from fulfilling the request",
+      });
+    }
+  }
+
+  public async myEventRegistrationHandler(_req: Request, res: Response) {
+    const user = res.locals.user;
+
+    try {
+      const events = await searchMyRegisteredEvents(user._id);
+
+      if (!events) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: "no events found" });
+      }
+
+      return res
+        .status(StatusCodes.OK)
+        .json({ message: "Found events", events });
+    } catch (e) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message:
+          "The server encountered an unexpected condition that prevented it from fulfilling the request",
+      });
+    }
+  }
+
+  public async myOwnEventsHandler(_req: Request, res: Response) {
+    const user = res.locals.user;
+
+    try {
+      const events = await searchOwnEvents(user._id);
+
+      if (!events) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: "no events found" });
+      }
+
+      return res
+        .status(StatusCodes.OK)
+        .json({ message: "Found events", events });
+    } catch (e) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message:
+          "The server encountered an unexpected condition that prevented it from fulfilling the request",
+      });
     }
   }
 }
