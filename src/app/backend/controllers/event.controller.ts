@@ -130,6 +130,14 @@ export class EventController {
           .json({ message: "No more quotas" });
       }
 
+      for(const subscribedUsers of event.subscribers){
+          if (subscribedUsers === user._id) {
+              return res
+                  .status(StatusCodes.NOT_ACCEPTABLE)
+                  .json({ message: "Already registered for the event" });
+          }
+      }
+
       event.registeredParticipants++;
       event.subscribers.push(user._id);
       event.save();
