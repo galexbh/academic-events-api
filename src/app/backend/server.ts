@@ -3,6 +3,7 @@ import compress from "compression";
 import express from "express";
 import helmet from "helmet";
 import cors from "cors";
+import fileUpload from "express-fileupload";
 import deserializeUser from "./middlewares/deserializeUser.middleware";
 import log from "./shared/logger";
 import connect from "./shared/mongoConnection";
@@ -51,6 +52,12 @@ export class Server {
     this.express.use(helmet.hidePoweredBy());
     this.express.use(helmet.frameguard({ action: "deny" }));
     this.express.use(compress());
+    this.express.use(
+      fileUpload({
+        useTempFiles: true,
+        tempFileDir: "./uploads",
+      })
+    );
   }
 
   private async setMongoConfig() {

@@ -6,5 +6,8 @@ export default {
   dbUri: "MONGO_CONNECTION_KEY",
   sendGridKey: "SENDGRID_API_KEY",
   emailAddress: "EMAIL_ADDRESS",
+  api_secret: "CLOUD_API_SECRET",
+  cloud_name: "CLOUD_NAME",
+  api_key: "CLOUD_API_KEY",
   port: "PORT",
 };

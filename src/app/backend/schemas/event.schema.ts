@@ -19,9 +19,10 @@ export const createEventSchema = object({
     speaker: string({
       required_error: "Speaker is required",
     }),
-    limitParticipants: number({
+    limitParticipants: string({
       required_error: "Limit of participants is required",
-    }).nonnegative(),
+    })
+      .transform((val: any) => Number(val)),
     startDate: string({
       required_error: "Start date is required",
     }),

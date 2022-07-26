@@ -22,6 +22,7 @@ import { findInstitutionByDomain } from "../services/institution.services";
 import { assign } from "lodash";
 
 const mailCompany = config.get<string>("emailAddress");
+const unexpectedRequest = config.get<string>("unexpected");
 
 export class UserController {
   public async createUserHandler(
@@ -36,7 +37,7 @@ export class UserController {
         body.roles = [role?._id];
       } else {
         const foundRoles = await findRoles(body.roles);
-        body.roles = foundRoles.map((role) => role._id);
+        body.roles = foundRoles.map((role: any) => role._id);
       }
 
       const domain = body.email.substring(
@@ -74,8 +75,7 @@ export class UserController {
       }
 
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message:
-          "The server encountered an unexpected condition that prevented it from fulfilling the request",
+        message: unexpectedRequest,
       });
     }
   }
@@ -108,14 +108,13 @@ export class UserController {
           .json({ message: "Successfully updated verified" });
       } catch (e: any) {
         return res.status(StatusCodes.REQUEST_TIMEOUT).json({
-          message:
-            "The server did not receive a complete request message within the time that it was prepared to wait",
+          message: unexpectedRequest,
         });
       }
     }
 
     return res
-      .status(StatusCodes.CONFLICT)
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
       .json({ message: "Could not verify user" });
   }
 
@@ -168,8 +167,7 @@ export class UserController {
       return res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
         .json({
-          message:
-            "The server encountered an unexpected condition that prevented it from fulfilling the request",
+          message: unexpectedRequest,
         });
     }
   }
@@ -205,9 +203,8 @@ export class UserController {
         .status(StatusCodes.ACCEPTED)
         .json({ message: "Successfully updated password" });
     } catch (e: any) {
-      return res.status(StatusCodes.REQUEST_TIMEOUT).json({
-        message:
-          "The server did not receive a complete request message within the time that it was prepared to wait",
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: unexpectedRequest,
       });
     }
   }

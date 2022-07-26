@@ -19,8 +19,12 @@ import { assign } from "lodash";
 import sendEmail from "../shared/mailer";
 import config from "config";
 import { templateEventSubscription } from "../templates/eventSubscription";
+import { UploadedFile } from "express-fileupload";
+import { deleteImage, uploadImage } from "../shared/cloudinary";
+import fs from "fs-extra";
 
 const mailCompany = config.get<string>("emailAddress");
+const unexpectedRequest = config.get<string>("unexpected");
 
 export class EventController {
   public async createEventHandler(
@@ -32,16 +36,32 @@ export class EventController {
       { owner: user._id, institution: user.institution },
       req.body
     );
+    const { tempFilePath } = req.files?.image as UploadedFile;
+    console.log(req.files?.image as UploadedFile);
     try {
-      await createEvent(payload);
+      const event = await createEvent(payload);
+
+      if (tempFilePath) {
+        const result = await uploadImage(tempFilePath);
+        event.image = {
+          publicId: result.public_id,
+          secureUrl: result.secure_url,
+        };
+        await fs.unlink(tempFilePath);
+      }
+
+      await event.save();
 
       return res
         .status(StatusCodes.CREATED)
         .json({ message: "Event successfully created" });
     } catch (e: any) {
-      return res
-        .status(StatusCodes.CONFLICT)
-        .json({ message: "Conflicts when creating the event" });
+      if (tempFilePath) {
+        await fs.unlink(tempFilePath);
+      }
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: unexpectedRequest,
+      });
     }
   }
 
@@ -58,9 +78,9 @@ export class EventController {
         .json({ message: "Event successfully updated" });
     } catch (e: any) {
       console.log(e);
-      return res
-        .status(StatusCodes.CONFLICT)
-        .json({ message: "Conflicts when updating the event" });
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: unexpectedRequest,
+      });
     }
   }
 
@@ -68,29 +88,45 @@ export class EventController {
     const { id } = req.params;
 
     try {
-      await findEventByIdAndDelete(id);
+      const deleteEvent = await findEventByIdAndDelete(id);
+
+      if (!deleteEvent) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "There are no public events" });
+      }
+
+      await deleteImage(deleteEvent.image.publicId);
+
       return res
         .status(StatusCodes.OK)
         .json({ message: "Event successfully deleted" });
     } catch (e: any) {
       console.log(e);
-      return res
-        .status(StatusCodes.CONFLICT)
-        .json({ message: "Conflicts when deleting the event" });
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: unexpectedRequest,
+      });
     }
   }
 
   public async getPublicEventHandler(_req: Request, res: Response) {
     try {
       const publicEvents = await findEventsPublic();
+
+      if (!publicEvents) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: "There are no public events" });
+      }
+
       return res
         .status(StatusCodes.OK)
         .json({ message: "Successful public events", publicEvents });
     } catch (e: any) {
       console.log(e);
-      return res
-        .status(StatusCodes.CONFLICT)
-        .json({ message: "Conflicts in obtaining events" });
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: unexpectedRequest,
+      });
     }
   }
 
@@ -98,14 +134,21 @@ export class EventController {
     const user = res.locals.user;
     try {
       const privateEvents = await findEventsPrivate(user.institution);
+
+      if (!privateEvents) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "There are no private events" });
+      }
+
       return res
         .status(StatusCodes.OK)
         .json({ message: "Successful private events", privateEvents });
     } catch (e: any) {
       console.log(e);
-      return res
-        .status(StatusCodes.CONFLICT)
-        .json({ message: "Conflicts in obtaining events" });
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: unexpectedRequest,
+      });
     }
   }
 
@@ -156,8 +199,7 @@ export class EventController {
         .json({ message: "User has registered to the event" });
     } catch (e) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message:
-          "The server encountered an unexpected condition that prevented it from fulfilling the request",
+        message: unexpectedRequest,
       });
     }
   }
@@ -179,8 +221,7 @@ export class EventController {
         .json({ message: "Found events", events });
     } catch (e) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message:
-          "The server encountered an unexpected condition that prevented it from fulfilling the request",
+        message: unexpectedRequest,
       });
     }
   }
@@ -202,8 +243,7 @@ export class EventController {
         .json({ message: "Found events", events });
     } catch (e) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-        message:
-          "The server encountered an unexpected condition that prevented it from fulfilling the request",
+        message: unexpectedRequest,
       });
     }
   }

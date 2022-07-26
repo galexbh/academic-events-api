@@ -1,5 +1,6 @@
 import { getModelForClass, prop, Ref } from "@typegoose/typegoose";
 import { Category } from "./category.model";
+import { EventImage } from "./eventImage.model";
 import { Institution } from "./institution.model";
 import { User } from "./user.model";
 
@@ -30,6 +31,9 @@ export class Event {
 
   @prop({ required: true })
   public speaker: string;
+
+  @prop({ type: () => EventImage, required: false })
+  public image: EventImage;
 
   @prop({ default: 0 })
   public limitParticipants: number;
