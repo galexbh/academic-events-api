@@ -4,8 +4,8 @@ export function createEvent(input: Partial<Event>) {
   return EventModel.create(input);
 }
 
-export function findOneEvent(_id: string) {
-  return EventModel.findOne({ _id });
+export function findEventById(_id: string) {
+  return EventModel.findById(_id);
 }
 
 export function findEventByIdAndUpdate(_id: string, payload: Object) {

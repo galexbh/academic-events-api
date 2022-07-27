@@ -51,7 +51,7 @@ export const upgradeEventSchema = object({
     limitParticipants: number({
       required_error: "Limit of participants is required",
     })
-      .nonnegative()
+      .transform((val: any) => Number(val))
       .optional(),
     startDate: string({
       required_error: "Start date is required",

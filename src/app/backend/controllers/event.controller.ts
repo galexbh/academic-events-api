@@ -8,12 +8,12 @@ import { StatusCodes } from "http-status-codes";
 import {
   createEvent,
   findEventByIdAndDelete,
-  findEventByIdAndUpdate,
   findEventsPrivate,
   findEventsPublic,
-  findOneEvent,
+  findEventById,
   searchMyRegisteredEvents,
   searchOwnEvents,
+  findEventByIdAndUpdate,
 } from "../services/event.sevices";
 import { assign } from "lodash";
 import sendEmail from "../shared/mailer";
@@ -25,6 +25,8 @@ import fs from "fs-extra";
 
 const mailCompany = config.get<string>("emailAddress");
 const unexpectedRequest = config.get<string>("unexpected");
+const publicIdDefault = config.get<string>("public_id");
+const secureUrlDefault = config.get<string>("secure_url");
 
 export class EventController {
   public async createEventHandler(
@@ -36,19 +38,28 @@ export class EventController {
       { owner: user._id, institution: user.institution },
       req.body
     );
-    const { tempFilePath } = req.files?.image as UploadedFile;
-    console.log(req.files?.image as UploadedFile);
+    const image = req.files?.image as UploadedFile;
+
     try {
       const event = await createEvent(payload);
 
-      if (tempFilePath) {
-        const result = await uploadImage(tempFilePath);
+      if (image) {
+        const result = await uploadImage(image.tempFilePath);
         event.image = {
           publicId: result.public_id,
           secureUrl: result.secure_url,
         };
-        await fs.unlink(tempFilePath);
+        await fs.unlink(image.tempFilePath);
+        await event.save();
+        return res
+          .status(StatusCodes.CREATED)
+          .json({ message: "Event successfully created" });
       }
+
+      event.image = {
+        publicId: publicIdDefault,
+        secureUrl: secureUrlDefault,
+      };
 
       await event.save();
 
@@ -56,8 +67,8 @@ export class EventController {
         .status(StatusCodes.CREATED)
         .json({ message: "Event successfully created" });
     } catch (e: any) {
-      if (tempFilePath) {
-        await fs.unlink(tempFilePath);
+      if (image) {
+        await fs.unlink(image.tempFilePath);
       }
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: unexpectedRequest,
@@ -70,14 +81,36 @@ export class EventController {
     res: Response
   ) {
     const { id } = req.params;
-
     try {
-      await findEventByIdAndUpdate(id, { ...req.body });
+      const event = await findEventByIdAndUpdate(id, { ...req.body });
+
+      if (!event) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "There are no public events" });
+      }
+
+      const image = req.files?.image as UploadedFile;
+
+      if (image) {
+        if (event.image.publicId !== publicIdDefault) {
+          await deleteImage(event.image.publicId);
+        }
+        const result = await uploadImage(image.tempFilePath);
+        event.image = {
+          publicId: result.public_id,
+          secureUrl: result.secure_url,
+        };
+        await event.save();
+        return res
+          .status(StatusCodes.OK)
+          .json({ message: "Event successfully updated" });
+      }
+
       return res
         .status(StatusCodes.OK)
         .json({ message: "Event successfully updated" });
     } catch (e: any) {
-      console.log(e);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: unexpectedRequest,
       });
@@ -96,13 +129,14 @@ export class EventController {
           .json({ message: "There are no public events" });
       }
 
-      await deleteImage(deleteEvent.image.publicId);
+      if (deleteEvent.image.publicId !== publicIdDefault) {
+        await deleteImage(deleteEvent.image.publicId);
+      }
 
       return res
         .status(StatusCodes.OK)
         .json({ message: "Event successfully deleted" });
     } catch (e: any) {
-      console.log(e);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: unexpectedRequest,
       });
@@ -123,7 +157,6 @@ export class EventController {
         .status(StatusCodes.OK)
         .json({ message: "Successful public events", publicEvents });
     } catch (e: any) {
-      console.log(e);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: unexpectedRequest,
       });
@@ -145,7 +178,6 @@ export class EventController {
         .status(StatusCodes.OK)
         .json({ message: "Successful private events", privateEvents });
     } catch (e: any) {
-      console.log(e);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: unexpectedRequest,
       });
@@ -159,7 +191,7 @@ export class EventController {
     const user = res.locals.user;
     try {
       const { id } = req.params;
-      const event = await findOneEvent(id);
+      const event = await findEventById(id);
 
       if (!event) {
         return res
