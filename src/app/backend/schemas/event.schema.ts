@@ -1,4 +1,4 @@
-import { z, object, string, TypeOf, any, number } from "zod";
+import { z, object, string, TypeOf, any } from "zod";
 
 const modalityValues = ["virtual", "presencial"] as const;
 const typeValues = ["publico", "privado"] as const;
@@ -21,8 +21,7 @@ export const createEventSchema = object({
     }),
     limitParticipants: string({
       required_error: "Limit of participants is required",
-    })
-      .transform((val: any) => Number(val)),
+    }).transform((val: any) => Number(val)),
     startDate: string({
       required_error: "Start date is required",
     }),
@@ -48,7 +47,7 @@ export const upgradeEventSchema = object({
     speaker: string({
       required_error: "Speaker is required",
     }).optional(),
-    limitParticipants: number({
+    limitParticipants: string({
       required_error: "Limit of participants is required",
     })
       .transform((val: any) => Number(val))
