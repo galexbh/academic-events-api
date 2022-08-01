@@ -10,6 +10,7 @@ cloudinary.config({ cloud_name, api_key, api_secret, secure: true });
 export async function uploadImage(filePath: string) {
   return await cloudinary.uploader.upload(filePath, {
     folder: "academic",
+    allowed_formats: ["png", "jpg"],
   });
 }
 
