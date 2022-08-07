@@ -81,41 +81,40 @@ export class UserController {
   }
 
   public async verifyUserHandler(req: Request<VerifyUserInput>, res: Response) {
-    const { id, verificationCode } = req.params;
+    try {
+      const { id, verificationCode } = req.params;
 
-    const user = await findUserById(id);
+      const user = await findUserById(id);
 
-    if (!user) {
-      return res
-        .status(StatusCodes.NOT_FOUND)
-        .json({ message: "User not found" });
-    }
+      if (!user) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: "User not found" });
+      }
 
-    if (user.verified) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "User is already verified" });
-    }
+      if (user.verified) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "User is already verified" });
+      }
 
-    if (user.verificationCode === verificationCode) {
-      user.verified = true;
+      if (user.verificationCode === verificationCode) {
+        user.verified = true;
 
-      try {
         await user.save();
 
         return res
-          .status(StatusCodes.ACCEPTED)
+          .status(StatusCodes.OK)
           .json({ message: "Successfully updated verified" });
-      } catch (e: any) {
-        return res.status(StatusCodes.REQUEST_TIMEOUT).json({
-          message: unexpectedRequest,
-        });
       }
+      return res.status(StatusCodes.REQUEST_TIMEOUT).json({
+        message: "Could not verify user",
+      });
+    } catch (e: any) {
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ message: unexpectedRequest });
     }
-
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ message: "Could not verify user" });
   }
 
   public async forgotPasswordHandler(
@@ -162,13 +161,12 @@ export class UserController {
 
       log.debug(`Password reset email sent to ${email}`);
 
-      return res.status(StatusCodes.ACCEPTED).json({ message: message });
+      return res.status(StatusCodes.OK).json({ message: message });
+
     } catch (e: any) {
-      return res
-        .status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({
-          message: unexpectedRequest,
-        });
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: unexpectedRequest,
+      });
     }
   }
 
@@ -176,32 +174,33 @@ export class UserController {
     req: Request<ResetPasswordInput["params"], {}, ResetPasswordInput["body"]>,
     res: Response
   ) {
-    const { id, passwordResetCode } = req.params;
-
-    const { password } = req.body;
-
-    const user = await findUserById(id);
-
-    if (
-      !user ||
-      !user.passwordResetCode ||
-      user.passwordResetCode !== passwordResetCode
-    ) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ message: "Could not reset user password" });
-    }
-
-    user.passwordResetCode = null;
-
-    user.password = password;
-
     try {
+      const { id, passwordResetCode } = req.params;
+
+      const { password } = req.body;
+
+      const user = await findUserById(id);
+
+      if (
+        !user ||
+        !user.passwordResetCode ||
+        user.passwordResetCode !== passwordResetCode
+      ) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "Could not reset user password" });
+      }
+
+      user.passwordResetCode = null;
+
+      user.password = password;
+
       await user.save();
 
       return res
-        .status(StatusCodes.ACCEPTED)
+        .status(StatusCodes.OK)
         .json({ message: "Successfully updated password" });
+
     } catch (e: any) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: unexpectedRequest,
