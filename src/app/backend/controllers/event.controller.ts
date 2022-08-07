@@ -14,6 +14,7 @@ import {
   searchMyRegisteredEvents,
   searchOwnEvents,
   findEventByIdAndUpdate,
+  searchRegisteredUsers,
 } from "../services/event.sevices";
 import { assign } from "lodash";
 import sendEmail from "../shared/mailer";
@@ -80,8 +81,8 @@ export class EventController {
     req: Request<UpdateEventInput["params"], {}, UpdateEventInput["body"]>,
     res: Response
   ) {
-    const { id } = req.params;
     try {
+      const { id } = req.params;
       const event = await findEventByIdAndUpdate(id, { ...req.body });
 
       if (!event) {
@@ -118,9 +119,8 @@ export class EventController {
   }
 
   public async deleteEventHandler(req: Request<IdEventInput>, res: Response) {
-    const { id } = req.params;
-
     try {
+      const { id } = req.params;
       const deleteEvent = await findEventByIdAndDelete(id);
 
       if (!deleteEvent) {
@@ -266,6 +266,29 @@ export class EventController {
       return res
         .status(StatusCodes.BAD_REQUEST)
         .json({ message: "You are not subscribed to the event" });
+    } catch (e) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: unexpectedRequest,
+      });
+    }
+  }
+
+  public async showRegisteredUsersHandler(req: Request, res: Response) {
+    const user = res.locals.user;
+
+    try {
+      const { id } = req.params;
+      const events = await searchRegisteredUsers(id, user._id);
+
+      if (!events) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ message: "no events found" });
+      }
+
+      return res
+        .status(StatusCodes.OK)
+        .json({ message: "Registered users found", events });
     } catch (e) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: unexpectedRequest,

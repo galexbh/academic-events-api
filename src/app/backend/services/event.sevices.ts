@@ -28,6 +28,13 @@ export function searchOwnEvents(_id: string) {
   }).populate("category", "-_id name");
 }
 
+export function searchRegisteredUsers(_id: string, ownerID: string) {
+  return EventModel.findOne({
+    _id: _id,
+    owner: ownerID,
+  }, "subscribers").populate("subscribers", "-_id email firstName lastName");
+}
+
 export function findEventsPublic() {
   return EventModel.find({
     type: "publico",
