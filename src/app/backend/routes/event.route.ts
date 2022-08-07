@@ -30,6 +30,12 @@ export class EventRoute {
     );
 
     this.app.put(
+      "/api/v1/events/unsubscribed/:id",
+      [verifyUser, schemaValition(idEventSchema)],
+      this.eventcontroller.unsubscribeEventHandler
+    );
+
+    this.app.put(
       "/api/v1/events/:id",
       [verifyUser, schemaValition(updateEventSchema)],
       this.eventcontroller.updateEventHandler

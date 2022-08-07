@@ -205,8 +205,8 @@ export class EventController {
           .json({ message: "No more quotas" });
       }
 
-      for (const subscribedUsers of event.subscribers) {
-        if (String(subscribedUsers) === String(user._id)) {
+      for (const subscribedUser of event.subscribers) {
+        if (String(subscribedUser) === String(user._id)) {
           return res
             .status(StatusCodes.NOT_ACCEPTABLE)
             .json({ message: "Already registered for the event" });
@@ -229,6 +229,43 @@ export class EventController {
       return res
         .status(StatusCodes.OK)
         .json({ message: "User has registered to the event" });
+    } catch (e) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message: unexpectedRequest,
+      });
+    }
+  }
+
+  public async unsubscribeEventHandler(req: Request, res: Response) {
+    const user = res.locals.user;
+    try {
+      const { id } = req.params;
+      const event = await findEventById(id);
+
+      if (!event) {
+        return res
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ message: "No event found" });
+      }
+
+      for (const subscribedUser of event.subscribers) {
+        if (String(subscribedUser) === String(user._id)) {
+          event.registeredParticipants--;
+          const subscriberIndex = event.subscribers.indexOf(user._id);
+          if (subscriberIndex !== -1) {
+            event.subscribers.splice(subscriberIndex, 1);
+          }
+          event.save();
+
+          return res
+            .status(StatusCodes.OK)
+            .json({ message: "Unsubscribed from the event" });
+        }
+      }
+
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "You are not subscribed to the event" });
     } catch (e) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: unexpectedRequest,
