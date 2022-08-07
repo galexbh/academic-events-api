@@ -37,7 +37,7 @@ export class EventRoute {
 
     this.app.get(
       "/api/v1/events/registeredUsers/:id",
-      verifyUser,
+      [verifyUser, schemaValition(idEventSchema)],
       this.eventcontroller.showRegisteredUsersHandler
     );
 

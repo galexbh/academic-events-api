@@ -236,7 +236,10 @@ export class EventController {
     }
   }
 
-  public async unsubscribeEventHandler(req: Request, res: Response) {
+  public async unsubscribeEventHandler(
+    req: Request<IdEventInput>,
+    res: Response
+  ) {
     const user = res.locals.user;
     try {
       const { id } = req.params;
@@ -273,7 +276,10 @@ export class EventController {
     }
   }
 
-  public async showRegisteredUsersHandler(req: Request, res: Response) {
+  public async showRegisteredUsersHandler(
+    req: Request<IdEventInput>,
+    res: Response
+  ) {
     const user = res.locals.user;
 
     try {
