@@ -205,12 +205,11 @@ export class EventController {
           .json({ message: "No more quotas" });
       }
 
-      for (const subscribedUser of event.subscribers) {
-        if (String(subscribedUser) === String(user._id)) {
-          return res
-            .status(StatusCodes.NOT_ACCEPTABLE)
-            .json({ message: "Already registered for the event" });
-        }
+      const subscriberIndex = event.subscribers.indexOf(user._id);
+      if (subscriberIndex !== -1) {
+        return res
+          .status(StatusCodes.NOT_ACCEPTABLE)
+          .json({ message: "Already registered for the event" });
       }
 
       event.registeredParticipants++;
@@ -251,19 +250,16 @@ export class EventController {
           .json({ message: "No event found" });
       }
 
-      for (const subscribedUser of event.subscribers) {
-        if (String(subscribedUser) === String(user._id)) {
-          event.registeredParticipants--;
-          const subscriberIndex = event.subscribers.indexOf(user._id);
-          if (subscriberIndex !== -1) {
-            event.subscribers.splice(subscriberIndex, 1);
-          }
-          event.save();
+      const subscriberIndex = event.subscribers.indexOf(user._id);
+      if (subscriberIndex !== -1 && event.registeredParticipants > 0) {
+        event.subscribers.splice(subscriberIndex, 1);
+        event.registeredParticipants--;
 
-          return res
-            .status(StatusCodes.OK)
-            .json({ message: "Unsubscribed from the event" });
-        }
+        event.save();
+
+        return res
+          .status(StatusCodes.OK)
+          .json({ message: "Unsubscribed from the event" });
       }
 
       return res
