@@ -13,4 +13,12 @@ async function connect() {
   }
 }
 
+export async function disconnect() {
+  await mongoose.connection.close();
+
+  log.info("Disconnect from DB");
+
+  return;
+}
+
 export default connect;
