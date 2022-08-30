@@ -2,14 +2,13 @@ import config from "config";
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { CreateCategoryInput } from "../schemas/category.schema";
-import {
-  createCategory,
-  findAllCategories,
-} from "../services/category.services";
+import { CategoryServices } from "../services/category.services";
 
 const unexpectedRequest = config.get<string>("unexpected");
 
 export class CategoryController {
+  private readonly categoryServices: CategoryServices;
+
   public async createCategoryHandler(
     req: Request<{}, {}, CreateCategoryInput>,
     res: Response
@@ -17,7 +16,7 @@ export class CategoryController {
     const payload = req.body;
 
     try {
-      await createCategory(payload);
+      await this.categoryServices.createCategory(payload);
 
       return res
         .status(StatusCodes.CREATED)
@@ -31,7 +30,7 @@ export class CategoryController {
 
   public async getAllCategoryHandler(_req: Request, res: Response) {
     try {
-      const categories = await findAllCategories();
+      const categories = await this.categoryServices.findAllCategories();
 
       if (!categories) {
         return res

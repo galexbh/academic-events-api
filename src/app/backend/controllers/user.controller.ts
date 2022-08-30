@@ -5,26 +5,26 @@ import {
   ResetPasswordInput,
   VerifyUserInput,
 } from "../schemas/user.schema";
-import {
-  createUser,
-  findUserByEmail,
-  findUserById,
-} from "../services/user.services";
+import { UserServices } from "../services/user.services";
 import { StatusCodes } from "http-status-codes";
 import { nanoid } from "nanoid";
 import log from "../shared/logger";
-import { findOneRoleByName, findRoles } from "../services/role.services";
+import { RoleServices } from "../services/role.services";
 import sendEmail from "../shared/mailer";
-import config from "config";
 import { templateVerifyUser } from "../templates/verify";
 import { templateResetPassword } from "../templates/resetPassword";
-import { findInstitutionByDomain } from "../services/institution.services";
+import { InstitutionServices } from "../services/institution.services";
 import { assign } from "lodash";
+import config from "config";
 
 const mailCompany = config.get<string>("emailAddress");
 const unexpectedRequest = config.get<string>("unexpected");
 
 export class UserController {
+  private readonly userServices: UserServices;
+  private readonly roleServices: RoleServices;
+  private readonly institutionServices: InstitutionServices;
+
   public async createUserHandler(
     _req: Request<{}, {}, CreateUserInput>,
     res: Response
@@ -33,10 +33,10 @@ export class UserController {
 
     try {
       if (!body.roles) {
-        const role = await findOneRoleByName();
+        const role = await this.roleServices.findOneRoleByName();
         body.roles = [role?._id];
       } else {
-        const foundRoles = await findRoles(body.roles);
+        const foundRoles = await this.roleServices.findRoles(body.roles);
         body.roles = foundRoles.map((role: any) => role._id);
       }
 
@@ -45,11 +45,12 @@ export class UserController {
         body.email.length
       );
 
-      const Institution = await findInstitutionByDomain(domain);
+      const Institution =
+        await this.institutionServices.findInstitutionByDomain(domain);
 
       const payload = assign({ institution: Institution?._id }, body);
 
-      const user = await createUser(payload);
+      const user = await this.userServices.createUser(payload);
 
       const template = templateVerifyUser(
         user.firstName,
@@ -84,7 +85,7 @@ export class UserController {
     try {
       const { id, verificationCode } = req.params;
 
-      const user = await findUserById(id);
+      const user = await this.userServices.findUserById(id);
 
       if (!user) {
         return res
@@ -127,7 +128,7 @@ export class UserController {
 
       const { email } = req.body;
 
-      const user = await findUserByEmail(email);
+      const user = await this.userServices.findUserByEmail(email);
 
       if (!user) {
         log.debug(`User with email ${email} does not exists`);
@@ -162,7 +163,6 @@ export class UserController {
       log.debug(`Password reset email sent to ${email}`);
 
       return res.status(StatusCodes.OK).json({ message: message });
-
     } catch (e: any) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: unexpectedRequest,
@@ -179,7 +179,7 @@ export class UserController {
 
       const { password } = req.body;
 
-      const user = await findUserById(id);
+      const user = await this.userServices.findUserById(id);
 
       if (
         !user ||
@@ -200,7 +200,6 @@ export class UserController {
       return res
         .status(StatusCodes.OK)
         .json({ message: "Successfully updated password" });
-
     } catch (e: any) {
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: unexpectedRequest,

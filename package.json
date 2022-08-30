@@ -1,13 +1,13 @@
 {
   "name": "academic-events-api",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "",
   "repository": {
     "url": "https://github.com/galexbh/academic-events-api"
   },
   "main": "build/src/app/backend/start.js",
   "engines": {
-    "node": "16.15.0"
+    "node": ">=16.15.0"
   },
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/app/backend/start.ts",

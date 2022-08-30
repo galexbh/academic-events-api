@@ -5,7 +5,7 @@ import config from "config";
 const port = config.get<string>("port");
 
 export class BackendApp {
-  server?: Server;
+  private server?: Server;
 
   async start() {
     this.server = new Server(port);

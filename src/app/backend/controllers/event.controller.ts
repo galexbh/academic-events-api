@@ -4,24 +4,14 @@ import {
   IdEventInput,
   UpdateEventInput,
 } from "../schemas/event.schema";
-import { StatusCodes } from "http-status-codes";
-import {
-  createEvent,
-  findEventByIdAndDelete,
-  findEventsPrivate,
-  findEventsPublic,
-  findEventById,
-  searchMyRegisteredEvents,
-  searchOwnEvents,
-  findEventByIdAndUpdate,
-  searchRegisteredUsers,
-} from "../services/event.sevices";
-import { assign } from "lodash";
-import sendEmail from "../shared/mailer";
-import config from "config";
 import { templateEventSubscription } from "../templates/eventSubscription";
-import { UploadedFile } from "express-fileupload";
 import { deleteImage, uploadImage } from "../shared/cloudinary";
+import { EventServices } from "../services/event.sevices";
+import sendEmail from "../shared/mailer";
+import { UploadedFile } from "express-fileupload";
+import { StatusCodes } from "http-status-codes";
+import { assign } from "lodash";
+import config from "config";
 import fs from "fs-extra";
 
 const mailCompany = config.get<string>("emailAddress");
@@ -30,6 +20,8 @@ const publicIdDefault = config.get<string>("public_id");
 const secureUrlDefault = config.get<string>("secure_url");
 
 export class EventController {
+  private readonly eventServices: EventServices;
+  
   public async createEventHandler(
     req: Request<{}, {}, CreateEventInput>,
     res: Response
@@ -42,7 +34,7 @@ export class EventController {
     const image = req.files?.image as UploadedFile;
 
     try {
-      const event = await createEvent(payload);
+      const event = await this.eventServices.createEvent(payload);
 
       if (image) {
         const result = await uploadImage(image.tempFilePath);
@@ -83,7 +75,9 @@ export class EventController {
   ) {
     try {
       const { id } = req.params;
-      const event = await findEventByIdAndUpdate(id, { ...req.body });
+      const event = await this.eventServices.findEventByIdAndUpdate(id, {
+        ...req.body,
+      });
 
       if (!event) {
         return res
@@ -121,7 +115,7 @@ export class EventController {
   public async deleteEventHandler(req: Request<IdEventInput>, res: Response) {
     try {
       const { id } = req.params;
-      const deleteEvent = await findEventByIdAndDelete(id);
+      const deleteEvent = await this.eventServices.findEventByIdAndDelete(id);
 
       if (!deleteEvent) {
         return res
@@ -145,7 +139,7 @@ export class EventController {
 
   public async getPublicEventHandler(_req: Request, res: Response) {
     try {
-      const publicEvents = await findEventsPublic();
+      const publicEvents = await this.eventServices.findEventsPublic();
 
       if (!publicEvents) {
         return res
@@ -166,7 +160,9 @@ export class EventController {
   public async getPrivateEventHandler(_req: Request, res: Response) {
     const user = res.locals.user;
     try {
-      const privateEvents = await findEventsPrivate(user.institution);
+      const privateEvents = await this.eventServices.findEventsPrivate(
+        user.institution
+      );
 
       if (!privateEvents) {
         return res
@@ -191,7 +187,7 @@ export class EventController {
     const user = res.locals.user;
     try {
       const { id } = req.params;
-      const event = await findEventById(id);
+      const event = await this.eventServices.findEventById(id);
 
       if (!event) {
         return res
@@ -242,7 +238,7 @@ export class EventController {
     const user = res.locals.user;
     try {
       const { id } = req.params;
-      const event = await findEventById(id);
+      const event = await this.eventServices.findEventById(id);
 
       if (!event) {
         return res
@@ -280,7 +276,10 @@ export class EventController {
 
     try {
       const { id } = req.params;
-      const events = await searchRegisteredUsers(id, user._id);
+      const events = await this.eventServices.searchRegisteredUsers(
+        id,
+        user._id
+      );
 
       if (!events) {
         return res
@@ -302,7 +301,9 @@ export class EventController {
     const user = res.locals.user;
 
     try {
-      const events = await searchMyRegisteredEvents(user._id);
+      const events = await this.eventServices.searchMyRegisteredEvents(
+        user._id
+      );
 
       if (!events) {
         return res
@@ -324,7 +325,7 @@ export class EventController {
     const user = res.locals.user;
 
     try {
-      const events = await searchOwnEvents(user._id);
+      const events = await this.eventServices.searchOwnEvents(user._id);
 
       if (!events) {
         return res

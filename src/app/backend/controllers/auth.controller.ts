@@ -1,16 +1,15 @@
 import { Request, Response } from "express";
 import { get } from "lodash";
 import { CreateSessionInput } from "../schemas/auth.schema";
-import {
-  findSessionById,
-  signAccessToken,
-  signRefreshToken,
-} from "../services/auth.services";
-import { findUserByEmail, findUserById } from "../services/user.services";
+import { AuthServices } from "../services/auth.services";
+import { UserServices } from "../services/user.services";
 import { verifyJwt } from "../shared/jwt";
 import { StatusCodes } from "http-status-codes";
 
 export class AuthController {
+  private readonly authServices: AuthServices;
+  private readonly userServices: UserServices;
+
   public async createSessionHandler(
     req: Request<{}, {}, CreateSessionInput>,
     res: Response
@@ -18,7 +17,7 @@ export class AuthController {
     const { email, password } = req.body;
     const message = "Invalid email or password";
 
-    const user = await findUserByEmail(email);
+    const user = await this.userServices.findUserByEmail(email);
 
     if (!user) {
       return res.status(StatusCodes.BAD_REQUEST).json({ message: message });
@@ -36,9 +35,11 @@ export class AuthController {
       return res.status(StatusCodes.BAD_REQUEST).json({ message: message });
     }
 
-    const accessToken = signAccessToken(user);
+    const accessToken = this.authServices.signAccessToken(user);
 
-    const refreshToken = await signRefreshToken({ userId: user._id });
+    const refreshToken = await this.authServices.signRefreshToken({
+      userId: user._id,
+    });
 
     return res.status(StatusCodes.OK).json({
       accessToken,
@@ -60,19 +61,19 @@ export class AuthController {
       return res.status(StatusCodes.UNAUTHORIZED).json({ message: message });
     }
 
-    const session = await findSessionById(decoded.session);
+    const session = await this.authServices.findSessionById(decoded.session);
 
     if (!session || !session.valid) {
       return res.status(StatusCodes.UNAUTHORIZED).json({ message: message });
     }
 
-    const user = await findUserById(String(session.user));
+    const user = await this.userServices.findUserById(String(session.user));
 
     if (!user) {
       return res.status(StatusCodes.UNAUTHORIZED).json({ message: message });
     }
 
-    const accessToken = signAccessToken(user);
+    const accessToken = this.authServices.signAccessToken(user);
 
     return res.status(StatusCodes.OK).json({ accessToken });
   }
