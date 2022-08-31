@@ -17,5 +17,10 @@ export class AuthRoute {
       schemaValition(createSessionSchema),
       this.authcontroller.createSessionHandler
     );
+
+    this.app.post(
+      "/api/sessions/refresh",
+      this.authcontroller.refreshAccessTokenHandler
+    );
   }
 }
